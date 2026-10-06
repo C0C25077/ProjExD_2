@@ -77,6 +77,39 @@ def calc_accel_bb(tmr: int, vx: int, vy: int) -> tuple[pg.Surface, float, float]
 
     return bb_img, avx, avy
 
+
+#演習３：飛ぶ方向に従ってこうかとん画像を切り替える
+def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+    """
+    移動量 sum_mv (dx, dy) に応じて、適切な向きに回転・反転させたこうかとん画像を返す関数。
+    引数：
+        sum_mv: (dx, dy) の移動量タプル
+    戻り値：
+        回転・反転されたこうかとん Surface
+    """
+    # 左右反転と回転角の辞書定義 (左右反転フラグ, 回転角度)
+    # 元画像（3.png）は「左向き」なので、それを基準に角度を設定
+    kk_dict = {
+        (0, 0): (False, 0),        # 静止時（左向き）
+        (-5, 0): (False, 0),       # 左
+        (-5, -5): (False, -45),    # 左上
+        (0, -5): (True, 90),       # 上
+        (+5, -5): (True, 45),      # 右上
+        (+5, 0): (True, 0),        # 右
+        (+5, +5): (True, -45),     # 右下
+        (0, +5): (True, -90),      # 下
+        (-5, +5): (False, 45),     # 左下
+    }
+
+    # デフォルト画像を設定しておき、辞書から該当する反転・角度を取得
+    base_img = pg.image.load("fig/3.png")
+    flip_h, angle = kk_dict.get(sum_mv, (False, 0))
+
+    # 左右反転後に回転させて拡大率0.9で返す
+    flipped_img = pg.transform.flip(base_img, flip_h, False)
+    return pg.transform.rotozoom(flipped_img, angle, 0.9)
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -121,6 +154,10 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):  # どこからしらはみ出てる
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 先程の動きをキャンセルする
+        screen.blit(kk_img, kk_rct)
+        
+        # 【追加機能3】現在の移動量 sum_mv に応じて画像を切り替えて描画
+        kk_img = get_kk_img(tuple(sum_mv))
         screen.blit(kk_img, kk_rct)
         
         # 【追加機能2】爆弾の拡大・加速計算とRectのサイズ更新

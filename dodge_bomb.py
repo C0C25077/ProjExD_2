@@ -26,7 +26,31 @@ def check_bound(rect: pg.Rect) -> tuple[bool, bool]:
     if rect.top < 0 or HEIGHT < rect.bottom:  # 縦方向判定
         tate = False
     return yoko, tate
-    
+
+
+#演習１：ゲームオーバー画面
+def show_game_over(screen: pg.Surface) -> None:
+    """
+    衝突時にゲームオーバー画面（暗転幕とGameOverテキスト）を表示する関数。
+    引数：
+        screen: 描画先の画面Surface
+    """
+    # 1. 画面全体を少し暗くする半透明の黒い膜を作成
+    black_out = pg.Surface((WIDTH, HEIGHT))
+    black_out.set_alpha(150)  # 透明度（0〜255）
+    black_out.fill((0, 0, 0))
+    screen.blit(black_out, (0, 0))
+
+    # 2. 「GameOver」の文字を画面中央に表示
+    font = pg.font.Font(None, 80)
+    txt = font.render("GameOver", True, (255, 255, 255))
+    txt_rect = txt.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(txt, txt_rect)
+
+    # 3. 画面を更新し、2秒間静止してから終了
+    pg.display.update()
+    pg.time.wait(2000)
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -50,8 +74,9 @@ def main():
                 return
         screen.blit(bg_img, [0, 0]) 
 
-        if kk_rct.colliderect(bb_rct):  # 練習4：kkとbbのrectが重なっていたら
-            print("game over")
+        # 【追加機能1】衝突時の処理
+        if kk_rct.colliderect(bb_rct):
+            show_game_over(screen)  # 引数からkk_rctも不要になったため削除
             return
 
         key_lst = pg.key.get_pressed()

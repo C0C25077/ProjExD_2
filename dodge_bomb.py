@@ -152,6 +152,7 @@ def main():
             return
 
         key_lst = pg.key.get_pressed()
+        #修正済み
         sum_mv = [0, 0]
         for k, tpl in DELTA.items():
             if key_lst[k]:

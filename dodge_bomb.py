@@ -110,6 +110,20 @@ def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
     return pg.transform.rotozoom(flipped_img, angle, 0.9)
 
 
+#演習4つ目：独自機能(スコアの描画)
+def draw_score(screen: pg.Surface, tmr: int) -> None:
+    """
+    経過時間 tmr をもとにスコア（生存時間）を表示する関数。
+    引数:
+        screen: 描画先の画面Surface
+        tmr: 経過フレーム数
+    """
+    font = pg.font.Font(None, 40)  # フォントオブジェクト作成（サイズ40）
+    # tmr // 10 で適度な数字にする（10フレーム＝1スコア）
+    score_txt = font.render(f"SCORE: {tmr // 10}", True, (0, 0, 0))
+    screen.blit(score_txt, (20, 20))  # 画面の左上 (20, 20) に描画
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -173,6 +187,10 @@ def main():
         if not tate:  # tate == False
             vy *= -1
         screen.blit(bb_img, bb_rct)  # 練習2：爆弾表示
+        
+        # 【独自機能（演習4）】スコアの描画
+        draw_score(screen, tmr)
+        
         pg.display.update()
         tmr += 1
         clock.tick(50)

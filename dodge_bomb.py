@@ -50,7 +50,32 @@ def show_game_over(screen: pg.Surface) -> None:
     # 3. 画面を更新し、2秒間静止してから終了
     pg.display.update()
     pg.time.wait(2000)
+    
 
+#演習２：時間経過によってボール拡大、加速
+def calc_accel_bb(tmr: int, vx: int, vy: int) -> tuple[pg.Surface, float, float]:
+    """
+    経過時間 tmr に応じて拡大した爆弾 Surface と、加速された速度 (avx, avy) を返す関数。
+    引数:
+        tmr: 経過フレーム数
+        vx, vy: 爆弾の元の移動速度（方向情報）
+    戻り値:
+        (拡大された爆弾 Surface, 加速後の x方向速度, 加速後の y方向速度)
+    """
+    # 拡大・加速の倍率計算（10段階、最大10倍まで）
+    accel = min(10, 1 + tmr // 100)  # 100フレームごとに1倍ずつ上昇
+
+    # 倍率に合わせて半径を計算（初期値 10px * accel）
+    r = 10 * accel
+    bb_img = pg.Surface((2 * r, 2 * r))
+    pg.draw.circle(bb_img, (255, 0, 0), (r, r), r)  # 赤い円を描画
+    bb_img.set_colorkey((0, 0, 0))  # 黒背景透過
+
+    # 元の速度に向き(正負)を保ったまま倍率を掛ける
+    avx = vx * accel
+    avy = vy * accel
+
+    return bb_img, avx, avy
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -97,6 +122,12 @@ def main():
         if check_bound(kk_rct) != (True, True):  # どこからしらはみ出てる
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 先程の動きをキャンセルする
         screen.blit(kk_img, kk_rct)
+        
+        # 【追加機能2】爆弾の拡大・加速計算とRectのサイズ更新
+        bb_img, avx, avy = calc_accel_bb(tmr, vx, vy)
+        center = bb_rct.center
+        bb_rct = bb_img.get_rect()
+        bb_rct.center = center
 
         bb_rct.move_ip(vx, vy)  # 練習2：爆弾動く
         yoko, tate = check_bound(bb_rct)
